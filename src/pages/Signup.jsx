@@ -52,7 +52,7 @@ export default function Signup() {
 
     try {
       const response = await API.post(
-        "/auth/signup",
+        "/auth/register",
         {
           name: form.name.trim(),
           email: form.email.trim().toLowerCase(),
