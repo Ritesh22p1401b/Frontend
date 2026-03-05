@@ -11,6 +11,9 @@ const UploadResume = () => {
 
   const navigate = useNavigate();
 
+  /* =========================
+     FILE VALIDATION
+  ========================= */
   const validateFile = (selectedFile) => {
     const allowedTypes = [
       "application/pdf",
@@ -33,13 +36,16 @@ const UploadResume = () => {
 
   const handleFileSelect = (selectedFile) => {
     if (!selectedFile) return;
+
     if (validateFile(selectedFile)) {
       setFile(selectedFile);
       setMessage("");
     }
   };
 
-  /* ---------------- UPLOAD RESUME ---------------- */
+  /* =========================
+     UPLOAD RESUME
+  ========================= */
   const handleUpload = async () => {
     if (!file || loading) return;
 
@@ -48,32 +54,37 @@ const UploadResume = () => {
       setMessage("Uploading resume...");
 
       const formData = new FormData();
-      formData.append("file", file); // ✅ must match backend
+      formData.append("file", file); // must match backend
 
-      const response = await API.post("/resume/upload", formData);
+      const response = await API.post("/resume/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      const id = response.data.interviewId;
+      const { interviewId, questions } = response.data;
 
-      if (!id) {
-        alert("Interview creation failed.");
-        return;
+      if (!interviewId) {
+        throw new Error("Interview creation failed.");
       }
 
-      setInterviewId(id);
-      setMessage("Resume uploaded successfully.");
+      setInterviewId(interviewId);
 
-      // ✅ SUCCESS ALERT
-      alert(`${file.name} uploaded successfully!`);
+      if (!questions || questions.length === 0) {
+        setMessage("Resume uploaded but AI failed to generate questions.");
+        alert("Resume uploaded, but no questions were generated.");
+      } else {
+        setMessage("Resume uploaded and interview created.");
+        alert(`${file.name} uploaded successfully!`);
+      }
 
     } catch (error) {
-      console.error(error);
+      console.error("Upload Error:", error);
 
       const errorMsg =
         error?.response?.data?.message || "Upload failed.";
 
       setMessage(errorMsg);
-
-      // ❌ FAILURE ALERT
       alert(`Failed to upload ${file?.name || "file"}.\n${errorMsg}`);
 
     } finally {
@@ -81,7 +92,9 @@ const UploadResume = () => {
     }
   };
 
-  /* ---------------- START INTERVIEW ---------------- */
+  /* =========================
+     START INTERVIEW
+  ========================= */
   const handleStartInterview = () => {
     if (!interviewId) {
       alert("Please upload resume first.");
@@ -91,6 +104,9 @@ const UploadResume = () => {
     navigate(`/interview/${interviewId}`);
   };
 
+  /* =========================
+     UI
+  ========================= */
   return (
     <div className="flex flex-col items-center justify-center py-20">
       <h2 className="text-4xl font-bold mb-8">
