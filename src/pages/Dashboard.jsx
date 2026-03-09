@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import API from "../services/axios";
 
 import StatsCards from "../components/dashboard/StatsCards";
@@ -9,17 +10,17 @@ import InterviewTable from "../components/dashboard/InterviewTable";
 
 const Dashboard = () => {
 
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [analytics, setAnalytics] = useState(null);
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
 
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      navigate("/login");
+    if (!isAuthenticated) {
+      setLoading(false);
       return;
     }
 
@@ -33,17 +34,55 @@ const Dashboard = () => {
         setResults(resultsRes.data);
 
       } catch (err) {
-        console.error(err);
+        console.error("Dashboard load error:", err);
+      } finally {
+        setLoading(false);
       }
     }
 
     loadDashboard();
 
-  }, []);
+  }, [isAuthenticated]);
 
-  if (!analytics) {
-    return <div className="text-center py-40 text-gray-400">Loading Dashboard...</div>;
+  /* -------------------- NOT LOGGED IN -------------------- */
+
+  if (!isAuthenticated) {
+    return (
+      <section className="flex flex-col items-center justify-center text-center px-6 py-32 relative overflow-hidden">
+
+        <div className="absolute w-[600px] h-[600px] bg-green-400/20 blur-[150px] rounded-full top-20"></div>
+
+        <h1 className="text-4xl md:text-6xl font-bold max-w-3xl">
+          Login to view your <span className="text-green-400">Dashboard</span>
+        </h1>
+
+        <p className="mt-6 text-gray-400 max-w-xl text-lg">
+          Your interview analytics, performance graphs,
+          and AI feedback will appear here.
+        </p>
+
+        <button
+          onClick={() => navigate("/login")}
+          className="mt-10 px-8 py-4 bg-green-400 text-black text-lg font-semibold rounded-xl shadow-lg hover:scale-105 transition duration-300"
+        >
+          Login First
+        </button>
+
+      </section>
+    );
   }
+
+  /* -------------------- LOADING -------------------- */
+
+  if (loading) {
+    return (
+      <div className="text-center py-40 text-gray-400">
+        Loading Dashboard...
+      </div>
+    );
+  }
+
+  /* -------------------- DASHBOARD -------------------- */
 
   return (
     <section className="relative px-6 py-20 overflow-hidden">
@@ -57,7 +96,7 @@ const Dashboard = () => {
           AI Interview <span className="text-green-400">Dashboard</span>
         </h1>
 
-        {/* Stats */}
+        {/* Stats Cards */}
         <StatsCards analytics={analytics} />
 
         {/* Graph Section */}
