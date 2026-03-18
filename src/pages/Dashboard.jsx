@@ -1,4 +1,12 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import API from "../services/axios";
+
+import StatsCards from "../components/dashboard/StatsCards";
+import TrendChart from "../components/dashboard/TrendChart";
+import SkillRadar from "../components/dashboard/SkillRadar";
+import InterviewTable from "../components/dashboard/InterviewTable";
 
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
