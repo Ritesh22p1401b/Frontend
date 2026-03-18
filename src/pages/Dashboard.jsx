@@ -14,7 +14,7 @@ const Dashboard = () => {
       return;
     }
 
-    async function loadDashboard() {
+    const loadDashboard = async () => {
       try {
         const [analyticsRes, resultsRes] = await Promise.all([
           API.get("/dashboard/analytics"),
@@ -31,12 +31,12 @@ const Dashboard = () => {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     loadDashboard();
   }, [isAuthenticated]);
 
-  /* -------------------- NOT LOGGED IN -------------------- */
+  /* NOT LOGGED IN */
 
   if (!isAuthenticated) {
     return (
@@ -48,7 +48,7 @@ const Dashboard = () => {
         </h1>
 
         <p className="mt-6 text-gray-400 max-w-xl text-lg">
-          Your interview analytics, performance graphs, and AI feedback will
+          Your interview analytics, performance graphs and AI feedback will
           appear here.
         </p>
 
@@ -62,7 +62,7 @@ const Dashboard = () => {
     );
   }
 
-  /* -------------------- LOADING -------------------- */
+  /* LOADING */
 
   if (loading) {
     return (
@@ -72,7 +72,7 @@ const Dashboard = () => {
     );
   }
 
-  /* -------------------- DASHBOARD -------------------- */
+  /* DASHBOARD */
 
   return (
     <section className="relative px-6 py-20 overflow-hidden">
@@ -93,7 +93,7 @@ const Dashboard = () => {
         </div>
 
         {/* Interview History */}
-        <InterviewTable results={results} />
+        <InterviewTable results={results || []} />
       </div>
     </section>
   );
